@@ -3,4 +3,4 @@ project(wordle C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(wordle main.c words.h)
+add_executable(wordle main.c)

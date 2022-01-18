@@ -7,5 +7,5 @@ Programm that runs through a wordlist to find matches to a given input
 -x <chars> chars that should be excluded as a following order -x aeiou to exclude all vowels  
 -l <list_name> name of the textfile with the wordlist  
 
-  the list_name is necessary, count has a default of 16, exclude and pattern are optional.
+  the list_name and count are necessary, exclude and pattern are optional.
 MAX_WORD_LEN  is by default 128, if no count is given as an argument it'll read up to 128 chars per line otherwise the entered count

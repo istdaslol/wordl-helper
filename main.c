@@ -10,6 +10,7 @@
  * Global variables to store arguments passed by to user, and used by every function
  */
 int word_length = 0;
+int matches = 0;
 char* excluded_chars = NULL;
 char* included_chars = NULL;
 char* wordlist = NULL;
@@ -55,7 +56,6 @@ static void read_arguments(int argc, char* argv[])
 				// -c check also if there is a next entry and that it isn't an option
 			else if (argv[i][1] == 'c' && i + 1 < argc && argv[i + 1][0] != '-')
 			{
-
 				i++;
 				word_length = atoi(argv[i]);
 			}
@@ -63,33 +63,26 @@ static void read_arguments(int argc, char* argv[])
 				// -p check also if there is a next entry and that it isn't an option
 			else if (argv[i][1] == 'p' && i + 1 < argc && argv[i + 1][0] != '-')
 			{
-
 				i++;
 				pattern = argv[i];
-
 			}
 				// -x check also if there is a next entry and that it isn't an option
 			else if (argv[i][1] == 'x' && i + 1 < argc && argv[i + 1][0] != '-')
 			{
-
 				i++;
 				excluded_chars = argv[i];
-
 			}
 				// -k check also if there is a next entry and that it isn't an option
 			else if (argv[i][1] == 'k' && i + 1 < argc && argv[i + 1][0] != '-')
 			{
-
 				i++;
 				included_chars = argv[i];
 			}
 				// -l check also if there is a next entry and that it isn't an option
 			else if (argv[i][1] == 'l' && i + 1 < argc && argv[i + 1][0] != '-')
 			{
-
 				i++;
 				wordlist = argv[i];
-
 			}
 				// if no match was found print error message and exit
 			else
@@ -265,6 +258,7 @@ void find_word(void)
 
 		if (test_success)
 		{
+			matches++;
 			printf("Word found: %s", current_word);
 		}
 	}
@@ -290,7 +284,7 @@ int main(int argc, char* argv[])
 	// stop timer for total runtime
 	clock_t prg_end = clock();
 	// print total runtime timer
-	printf("total time to find word(s): %.2f Seconds", (float)(prg_end - prg_start) / CLOCKS_PER_SEC);
+	printf("total time to find %d word(s): %.2f Seconds", matches, (float)(prg_end - prg_start) / CLOCKS_PER_SEC);
 
 	return EXIT_SUCCESS;
 }

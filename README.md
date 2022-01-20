@@ -9,3 +9,8 @@ Program that runs through a wordlist to find matches to a given input
 -l \<list_name\> name of the textfile with the wordlist  
 
   the list_name and count are necessary, excluded, included and pattern are optional.
+
+# Wordlist
+the included list is very old but works fast and has most of what's needed  
+I recomend using an own, newer list like  
+-> https://github.com/dwyl/english-words/

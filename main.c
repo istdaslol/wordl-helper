@@ -208,7 +208,7 @@ bool test_included_chars(char* word)
 		included_chars_count += (included_char_found) ? 1 : 0;
 	}
 
-	return included_char_found == i;
+	return included_chars_count == i;
 }
 
 /**

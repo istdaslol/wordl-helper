@@ -15,6 +15,7 @@ char* excluded_chars = NULL;
 char* included_chars = NULL;
 char* wordlist = NULL;
 char* pattern = NULL;
+char* included_chars_missing = NULL;
 
 /**
  * prints the help message
@@ -123,92 +124,112 @@ static void read_arguments(int argc, char* argv[])
 }
 
 /**
- * checks if a given word is the length stored in the global variable word_length
- * accounts for '\n' at the end of the string
- * @param word that needs to be checked
- * @return  true if is the needed length, false otherwise
+ * Checks if a given char is in the excluded list
+ * @param curr_char character to be tested
+ * @return true if it is in the list, false otherwise
  */
-bool test_len(char* word)
+bool is_excluded_char(const char* curr_char)
 {
-	return ((strlen(word) == word_length && word[word_length - 1] != '\n')
-			|| (strlen(word) == word_length + 1 && word[word_length] == '\n'));
-}
-
-/**
- * checks if a given word has any of the excluded chars entered at start
- * @param word that is going to be checked
- * @return true if no excluded chars were found, false otherwise
- */
-bool test_excluded_chars(const char* word)
-{
-	bool excluded_char_found = false;
 	int i = 0;
-	int j;
-
-	while (!excluded_char_found && i < word_length)
+	while (excluded_chars[i] != '\0')
 	{
-		j = 0;
-		while (!excluded_char_found && j < strlen(excluded_chars))
+		if (excluded_chars[i] == *curr_char)
 		{
-			excluded_char_found = word[i] == excluded_chars[j];
-			j++;
+			return true;
 		}
 		i++;
 	}
-	return !(excluded_char_found);
+	return false;
 }
 
 /**
- * checks if a word has the entered pattern
- * @param word that's going to be checked
- * @return true if the pattern was found, false otherwise
+ * checks if a given char in in the included list and replaces in in the list so no duplicates are a positive check
+ * @param curr_char character to be tested
+ * @return true if in the list, false otherwise
  */
-bool test_pattern(const char* word)
+bool is_included_char(const char* curr_char)
 {
-	bool pattern_found = true;
 	int i = 0;
-
-	while (pattern_found && i < word_length)
+	while (included_chars_missing[i] != '\0')
 	{
-		if (pattern[i] == '_')
+		if (included_chars_missing[i] == *curr_char)
 		{
-			i++;
-			continue;
-		}
-		else
-		{
-			pattern_found = word[i] == pattern[i];
+			included_chars_missing[i] = '_';
+			return true;
 		}
 		i++;
 	}
-	return pattern_found;
+	return false;
 }
 
 /**
- * checks if a given word has all of the included chars entered at start
- * @param word that's going to be checked
- * @return true if ALL chars were found, false otherwise
+ * checks if a given String applies to all filters given by the user
+ * @param word String to be tested
+ * @return true if the word is valid, false otherwise
  */
-bool test_included_chars(char* word)
+bool test_word(const char* word)
 {
-	bool included_char_found;
 	int i = 0;
-	int j;
 	int included_chars_count = 0;
-	while (i < strlen(included_chars))
+
+	bool is_valid = true;
+
+	if (included_chars != NULL)
 	{
-		j = 0;
-		included_char_found = false;
-		while (j < strlen(word) && !included_char_found)
-		{
-			included_char_found = included_chars[i] == word[j];
-			j++;
-		}
-		i++;
-		included_chars_count += (included_char_found) ? 1 : 0;
+		included_chars_missing = malloc(26 * sizeof(char));
+		strcpy(included_chars_missing, included_chars);
 	}
 
-	return included_chars_count == i;
+	while (word[i] != '\0' && word[i] != '\n' && is_valid)
+	{
+		if (pattern != NULL) // pattern was submitted
+		{
+				if (pattern[i] == '_') // position is a wildcard
+				{
+					if (excluded_chars != NULL)
+					{
+						is_valid = !(is_excluded_char(&word[i]));
+					}
+
+					if (is_valid && included_chars != NULL)
+					{
+						included_chars_count += is_included_char(&word[i]) ? 1 : 0;
+					}
+				}
+				else // position has to be a given char
+				{
+					is_valid = word[i] == pattern[i];
+				}
+		}
+
+		else // no pattern just check chars
+		{
+			if (excluded_chars != NULL)
+			{
+				is_valid = !(is_excluded_char(&word[i]));
+			}
+
+			if (included_chars != NULL)
+			{
+				included_chars_count += is_included_char(&word[i]) ? 1 : 0;
+			}
+		}
+
+		i++;
+		// check if word isn't larger than the maximum length
+		if (is_valid)
+		{
+			is_valid = i <= word_length;
+		}
+	}
+
+	// check if all included chars were found
+	if (is_valid && included_chars != NULL)
+	{
+		is_valid = included_chars_count == strlen(included_chars);
+	}
+
+	return is_valid;
 }
 
 /**
@@ -239,22 +260,7 @@ void find_word(void)
 	 */
 	while (fgets(current_word, MAX_WORD_LEN, wordlist_stream))
 	{
-		test_success = test_len(current_word);
-
-		if (test_success && excluded_chars != NULL)
-		{
-			test_success = test_excluded_chars(current_word);;
-		}
-
-		if (test_success && included_chars != NULL)
-		{
-			test_success = test_included_chars(current_word);
-		}
-
-		if (test_success && pattern != NULL)
-		{
-			test_success = test_pattern(current_word);
-		}
+		test_success = test_word(current_word);
 
 		if (test_success)
 		{
@@ -265,6 +271,7 @@ void find_word(void)
 
 	fclose(wordlist_stream);
 }
+
 
 int main(int argc, char* argv[])
 {

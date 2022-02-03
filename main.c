@@ -223,6 +223,12 @@ bool test_word(const char* word)
 		}
 	}
 
+	// check if word is the needed length
+	if (is_valid)
+	{
+		is_valid = i == word_length;
+	}
+
 	// check if all included chars were found
 	if (is_valid && included_chars != NULL)
 	{
@@ -271,7 +277,6 @@ void find_word(void)
 
 	fclose(wordlist_stream);
 }
-
 
 int main(int argc, char* argv[])
 {
